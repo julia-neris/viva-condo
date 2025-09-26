@@ -1,25 +1,32 @@
 "use client";
 
-import { useEffect, useState } from 'react'  //useState é uma função do React que permite a um componente ter estado interno. 
-// O estado é um valor que, quando muda, faz o React re-renderizar o componente com os novos dados.
-
-import { getCondominios, ICondominio } from '@/services/api-condominios'; //@ alias '../../../services/api-condominios' tsconfig.json
+import { useEffect, useState } from 'react' 
+import { ICondominio } from '@/services/condominio.service';
+// import { ICondominio } from '@/services/condominio.local.service';
 
 export default function ListaCondominios() {
-
-  const [condominios, setCondominios] = useState<ICondominio[]>([]) // Inicializa o estado com um array vazio
-
-  useEffect(() => { //hook que executa uma função quando o componente é montado, após a renderização inicial.
+  const [condominios, setCondominios]= useState<ICondominio[]>([])
+  const [erro, setErro] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => { //hook que executa uma função quando o componente é montado.
     const buscarCondominios = async () => {
-      const data = await getCondominios()
-      console.log(data) 
-      setCondominios(data) // Atualiza o estado com os dados obtidos
-    }
+      try {
+        const response = await fetch("/api/condominios", { cache: "no-store" });
+        const {data, success, count, error} = await response.json(); 
 
+        if (!success) throw new Error(error ?? "Erro ao buscar condomínios"); 
+        setCondominios(data);
+
+      } catch (e: any) {
+        setErro(e.message ?? "Erro inesperado");
+      } finally {
+        setLoading(false);
+      }      
+    };
     buscarCondominios()
-  }, []) // [] garante que o efeito seja executado apenas uma vez, quando o componente é montado. 
-  // Caso haja alguma váriavel no array, o efeito será executado novamente sempre que essa variável mudar.
-
+  }, []) // [] = executa apenas uma vez, quando o componente é montado.
+  
   return (
     <div className="p-6 max-w-full">
       <div className="mb-4 flex items-center justify-between gap-4">
@@ -41,7 +48,19 @@ export default function ListaCondominios() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 bg-white">
-            {condominios.length === 0 ? (
+             {loading ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-3 text-center text-gray-500">
+                  Carregando condomínios...
+                </td>
+              </tr>
+            ) : erro ? (
+              <tr>
+                <td colSpan={7} className="px-4 py-3 text-center text-red-600">
+                  {erro}
+                </td>
+              </tr>
+            ) :condominios.length === 0 ? (
               <tr>
                 <td className="px-4 py-3 text-sm text-gray-700" colSpan={7}>
                   Nenhum condomínio encontrado.
@@ -52,7 +71,7 @@ export default function ListaCondominios() {
                 <tr key={condominio.id_condominio} className="hover:bg-gray-50">
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{String(index + 1)}</td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{condominio.nome_condominio}</td>
-                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{condominio.endereco_condominio}</td>
+                  <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{condominio.endereco_condominio}</td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{condominio.cidade_condominio}</td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{condominio.uf_condominio}</td>
                   <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">{condominio.tipo_condominio}</td>
