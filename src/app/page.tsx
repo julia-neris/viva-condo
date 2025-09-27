@@ -93,7 +93,7 @@ export default function Login() {
     <div className="flex h-screen flex-col md:flex-row">
       <div className="w-full flex items-center justify-center p-6">
         <div className="w-full max-w-md bg-white p-8 shadow-lg rounded-lg">
-          <h2 className="text-2xl font-bold mb-4">✨🩷 Olá!!! 🩷✨</h2>
+          <h2 className="text-2xl font-bold mb-4 text-center">✨🩷 Olá!!! 🩷✨</h2>
           <p className="text-gray-500 mb-6">Insira as informações que você usou ao se registrar.</p>
           <form onSubmit={login}>
             <input
